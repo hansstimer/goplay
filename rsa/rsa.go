@@ -36,7 +36,7 @@ func main() {
 	messageBytes := bytes.NewBufferString(message)
 	sha1 := sha1.New()
 
-	out, err := encrypt(sha1, privateKey, message)
+	out, err := encrypt(sha1, privateKey, messageBytes)
 	if err != nil {
 		fmt.Printf("encrypt: %s", err)
 	}
