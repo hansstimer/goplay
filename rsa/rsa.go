@@ -8,8 +8,22 @@ import (
 	"fmt"
 )
 
-func encrypt(privateKey *rsa.PrivateKey, in []byte) {
+func encrypt(hash hash.Hash, privateKey *rsa.PrivateKey, in []byte) ([]byte, error) {
+	out, err := rsa.EncryptOAEP(hash, rand.Reader, &privateKey.PublicKey, in.Bytes(), nil)
+	if err != nil {
+		return nil, err
+	}
 
+	return out, err
+}
+
+func decrypt(hash hash.Hash, publicKey *rsa.PublicKey, in []byte) ([]byte, error) {
+	out, err := rsa.DecryptOAEP(hash, rand.Reader, publicKey, in, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return out, err
 }
 
 func main() {
@@ -17,13 +31,19 @@ func main() {
 	if err != nil {
 		fmt.Printf("rsa.GenerateKey: %v", err)
 	}
-	sha1 := sha1.New()
 
 	message := "Hello World!"
-	in := bytes.NewBufferString(message)
-	out, err := rsa.EncryptOAEP(sha1, rand.Reader, &privateKey.PublicKey, in.Bytes(), nil)
+	messageBytes := bytes.NewBufferString(message)
+	sha1 := sha1.New()
+
+	out, err := encrypt(sha1, privateKey, message)
 	if err != nil {
-		fmt.Printf("rsa.EncryptOAEP: %s", err)
+		fmt.Printf("encrypt: %s", err)
+	}
+
+	out, err := decrypt(sha1, &privateKey.PublicKey, out)
+	if err != nil {
+		fmt.Printf("encrypt: %s", err)
 	}
 
 	fmt.Printf("%V", out)
