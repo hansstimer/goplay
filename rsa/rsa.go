@@ -6,10 +6,11 @@ import (
 	"crypto/rsa"
 	"crypto/sha1"
 	"fmt"
+	"hash"
 )
 
-func encrypt(hash hash.Hash, privateKey *rsa.PrivateKey, in []byte) ([]byte, error) {
-	out, err := rsa.EncryptOAEP(hash, rand.Reader, &privateKey.PublicKey, in.Bytes(), nil)
+func encrypt(hash hash.Hash, publicKey *rsa.PublicKey, in []byte) ([]byte, error) {
+	out, err := rsa.EncryptOAEP(hash, rand.Reader, publicKey, in, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -17,8 +18,8 @@ func encrypt(hash hash.Hash, privateKey *rsa.PrivateKey, in []byte) ([]byte, err
 	return out, err
 }
 
-func decrypt(hash hash.Hash, publicKey *rsa.PublicKey, in []byte) ([]byte, error) {
-	out, err := rsa.DecryptOAEP(hash, rand.Reader, publicKey, in, nil)
+func decrypt(hash hash.Hash, privateKey *rsa.PrivateKey, in []byte) ([]byte, error) {
+	out, err := rsa.DecryptOAEP(hash, rand.Reader, privateKey, in, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -29,22 +30,25 @@ func decrypt(hash hash.Hash, publicKey *rsa.PublicKey, in []byte) ([]byte, error
 func main() {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 512)
 	if err != nil {
-		fmt.Printf("rsa.GenerateKey: %v", err)
+		fmt.Printf("rsa.GenerateKey: %v\n", err)
 	}
 
 	message := "Hello World!"
 	messageBytes := bytes.NewBufferString(message)
 	sha1 := sha1.New()
 
-	out, err := encrypt(sha1, privateKey, messageBytes)
+	encrypted, err := encrypt(sha1, &privateKey.PublicKey, messageBytes.Bytes())
 	if err != nil {
-		fmt.Printf("encrypt: %s", err)
+		fmt.Printf("encrypt: %s\n", err)
 	}
 
-	out, err := decrypt(sha1, &privateKey.PublicKey, out)
+	decrypted, err := decrypt(sha1, privateKey, encrypted)
 	if err != nil {
-		fmt.Printf("encrypt: %s", err)
+		fmt.Printf("decrypt: %s\n", err)
 	}
 
-	fmt.Printf("%V", out)
+	decryptedString := bytes.NewBuffer(decrypted).String()
+	fmt.Printf("message: %v\n", message)
+	fmt.Printf("encrypted: %v\n", encrypted)
+	fmt.Printf("decryptedString: %v\n", decryptedString)
 }
