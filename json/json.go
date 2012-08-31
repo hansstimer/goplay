@@ -1,26 +1,30 @@
 package main
 
 import (
-	"json"
+	"encoding/json"
 	"log"
 )
 
 type Foo struct {
-	count int
-	name string
+	Count int
+	Name  string
 }
-
-var a = []Foo{ {1, "pear"}, {2, "apple"}, {4, "banana"} }
 
 func main() {
-	b, err := json.Marshal(a)
-	if err != nil {
-		log.Exitln("Marshal failed:", err)
-	}
-	
-	log.Printf("%v\n", a)
-	log.Println("json:", string(b))
-	
-	
-}
+	a := []Foo{{1, "pear"}, {2, "apple"}, {4, "banana"}}
+	b := make([]Foo, 0)
 
+	bytes, err := json.Marshal(a)
+	if err != nil {
+		log.Fatalf("Marshal failed:", err)
+	}
+
+	log.Printf("premarshal: %v\n", a)
+	log.Println("json:", string(bytes))
+
+	err = json.Unmarshal(bytes, &b)
+	if err != nil {
+		log.Fatalf("Unmarshal failed: %v\n", err)
+	}
+	log.Printf("unmarshalled: %v\n", b)
+}
