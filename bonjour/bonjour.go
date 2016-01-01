@@ -26,7 +26,7 @@ func main() {
 		}
 	}(results, resolver.Exit)
 
-	err = resolver.Browse("_foobar._tcp", "local.", results)
+	err = resolver.Browse("_ssh._tcp", "local.", results)
 	if err != nil {
 		log.Println("Failed to browse:", err.Error())
 	}
