@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -17,9 +18,11 @@ func main() {
 
 	results := make(chan *bonjour.ServiceEntry)
 
+	t1 := time.Now()
 	go func(results chan *bonjour.ServiceEntry, exitCh chan<- bool) {
 		for e := range results {
 			log.Printf("%s", e.Instance)
+			fmt.Printf("duration: %s\n", time.Now().Sub(t1)/time.Millisecond)
 			exitCh <- true
 			time.Sleep(1e9)
 			os.Exit(0)
